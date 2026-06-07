@@ -1,0 +1,1082 @@
+<!--
+  FILE:        index-v2.html
+  VERSION:     2.0
+  DATE:        2026-06-06
+  CR:          CR002
+  CHANGES:     - Added PDF export of AI analysis report (jsPDF, client-side)
+               - Full mobile & tablet responsive layout (breakpoints at 480px, 640px, 768px)
+               - Version tracking headers added to all files
+               - Export button appears after AI analysis is returned
+               - Sticky mobile action bar for Analyze + Export on small screens
+               - Improved slider touch targets for mobile
+  AUTHOR:      Thinkezly / CJ
+  PREV VERSION: index-v1.html (CR001 — initial build)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agency Niche Evaluator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface2: #f0efe9;
+      --border: #e2e0d8;
+      --border2: #ccc9bc;
+      --text: #1a1917;
+      --text2: #6b6860;
+      --text3: #9c9a92;
+      --green-bg: #eaf3de;
+      --green-text: #3b6d11;
+      --amber-bg: #faeeda;
+      --amber-text: #854f0b;
+      --red-bg: #fcebeb;
+      --red-text: #a32d2d;
+      --orange-bg: #faece7;
+      --orange-text: #993c1d;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+      --page-pad: 1.5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141412;
+        --surface: #1e1d1a;
+        --surface2: #252420;
+        --border: #2e2d29;
+        --border2: #3d3c37;
+        --text: #f0efe9;
+        --text2: #9c9a90;
+        --text3: #6b6860;
+        --green-bg: #1a2e0d;
+        --green-text: #9bcf5f;
+        --amber-bg: #2a1f06;
+        --amber-text: #f5c040;
+        --red-bg: #2a0f0f;
+        --red-text: #f09090;
+        --orange-bg: #2a1308;
+        --orange-text: #f09060;
+      }
+    }
+
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Page layout ── */
+    .page {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2rem var(--page-pad) 6rem;
+    }
+
+    /* ── Header ── */
+    .header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      background: var(--text);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-mark svg { color: var(--bg); }
+    .header h1 {
+      font-size: clamp(18px, 4vw, 24px);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .header p { font-size: 14px; color: var(--text2); }
+    .source-badge {
+      font-size: 11px;
+      font-family: var(--mono);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border2);
+      color: var(--text3);
+      white-space: nowrap;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 10px;
+    }
+
+    /* ── Niche input row ── */
+    .niche-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.75rem;
+    }
+    .niche-row input {
+      flex: 1;
+      min-width: 0;
+      height: 44px;
+      padding: 0 14px;
+      font-family: var(--font);
+      font-size: 15px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .niche-row input:focus { border-color: var(--text2); }
+    .niche-row input::placeholder { color: var(--text3); }
+
+    /* ── Buttons ── */
+    .btn {
+      height: 44px;
+      padding: 0 18px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text2);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, opacity 0.15s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover { background: var(--surface2); color: var(--text); }
+    .btn:active { opacity: 0.7; }
+    .btn-primary {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+    .btn-primary:hover { opacity: 0.85; color: var(--bg); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-export {
+      background: var(--surface);
+      color: var(--text2);
+      border-color: var(--border2);
+    }
+
+    /* ── Example chips ── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 1.75rem;
+    }
+    .chip {
+      font-size: 12px;
+      padding: 6px 13px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      color: var(--text2);
+      background: var(--surface);
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .chip:hover, .chip:active {
+      border-color: var(--border2);
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    /* ── Criteria card ── */
+    .criteria-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .criterion { padding: 16px 18px; }
+    .criterion + .criterion { border-top: 1px solid var(--border); }
+    .crit-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .crit-left { flex: 1; min-width: 0; }
+    .crit-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .crit-name .icon { font-size: 15px; color: var(--text3); }
+    .disq-tag {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--orange-bg);
+      color: var(--orange-text);
+    }
+    .crit-desc {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 3px;
+      line-height: 1.55;
+    }
+    .crit-score {
+      font-size: 28px;
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--text);
+      min-width: 34px;
+      text-align: right;
+      letter-spacing: -0.03em;
+      flex-shrink: 0;
+    }
+
+    /* ── Range slider ── */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slider-wrap span {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: var(--mono);
+      min-width: 12px;
+      flex-shrink: 0;
+    }
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: var(--border2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      touch-action: pan-y;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--text);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border: none;
+      border-radius: 50%;
+      background: var(--text);
+      cursor: pointer;
+    }
+
+    /* ── Pay warning ── */
+    .pay-warning {
+      display: none;
+      border-left: 3px solid #D85A30;
+      background: var(--orange-bg);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--orange-text);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .pay-warning strong { font-weight: 600; }
+
+    /* ── Result panel ── */
+    .result-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .result-top {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .score-num {
+      font-size: clamp(40px, 10vw, 54px);
+      font-weight: 600;
+      font-family: var(--mono);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--text);
+    }
+    .score-denom { font-size: 20px; color: var(--text3); font-family: var(--mono); }
+    .verdict-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 13px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+    }
+    .verdict-badge.powerhouse { background: var(--green-bg); color: var(--green-text); }
+    .verdict-badge.viable     { background: var(--amber-bg); color: var(--amber-text); }
+    .verdict-badge.risky      { background: var(--red-bg);   color: var(--red-text);   }
+    .progress-track {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease, background-color 0.4s ease;
+    }
+    .result-text { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+    /* ── Breakdown grid ── */
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+    .bd-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+    .bd-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+    .bd-val {
+      font-size: 20px;
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .bd-val span { font-size: 13px; color: var(--text3); font-weight: 400; }
+    .bd-bar-track { height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; }
+    .bd-bar-fill { height: 100%; border-radius: 2px; transition: width 0.35s ease; }
+
+    /* ── Action buttons row ── */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .action-row .btn-primary { flex: 1; min-width: 160px; height: 46px; font-size: 14px; border-radius: var(--radius-md); }
+    .action-row .btn-export  { height: 46px; font-size: 13px; border-radius: var(--radius-md); display: none; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: rgba(255,255,255,0.85);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Analysis result panel ── */
+    .analysis-result {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .analysis-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .analysis-header h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .analysis-niche-tag {
+      font-size: 12px;
+      font-weight: 400;
+      font-family: var(--mono);
+      color: var(--text3);
+      background: var(--surface2);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .analysis-body {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.75;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .analysis-error { color: var(--red-text); }
+
+    /* ── Export btn inside panel ── */
+    .export-inline-btn {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .export-inline-btn .btn {
+      font-size: 13px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.7;
+    }
+
+    /* ── Mobile sticky bar ── */
+    .sticky-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 12px var(--page-pad);
+      gap: 8px;
+      z-index: 100;
+    }
+    .sticky-bar .btn-primary { flex: 1; height: 46px; font-size: 14px; border-radius: var(--radius-md); }
+    .sticky-bar .btn-export  { height: 46px; font-size: 13px; border-radius: var(--radius-md); display: none; }
+
+    /* ── Responsive breakpoints ── */
+    @media (max-width: 640px) {
+      :root { --page-pad: 1rem; }
+
+      .page { padding-top: 1.25rem; }
+      .source-badge { display: none; }
+      .action-row { display: none; }
+      .sticky-bar { display: flex; }
+      .criterion { padding: 14px 14px; }
+      .crit-desc { display: none; }
+      .breakdown-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .header-left { gap: 10px; }
+      .logo-mark { width: 34px; height: 34px; min-width: 34px; }
+      .header h1 { font-size: 18px; }
+      .niche-row input { font-size: 16px; }
+      .crit-score { font-size: 22px; }
+      .breakdown-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+      .chips { gap: 5px; }
+    }
+
+    @media (min-width: 641px) and (max-width: 768px) {
+      .breakdown-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <div class="header-left">
+        <div class="logo-mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div>
+          <h1>AI Agency Niche Evaluator</h1>
+          <p>Score your niche across 7 criteria. Built on Luke Pierce's framework.</p>
+        </div>
+      </div>
+      <span class="source-badge">Boom Automations Framework</span>
+    </div>
+  </header>
+
+  <!-- Niche input -->
+  <div class="section-label">Your niche</div>
+  <div class="niche-row">
+    <input type="text" id="nicheInput" placeholder="e.g. Healthcare clinics, Roofing contractors…" autocomplete="off" />
+    <button class="btn" onclick="resetAll()">Reset</button>
+  </div>
+
+  <!-- Example chips -->
+  <div class="section-label">Quick-load an example</div>
+  <div class="chips">
+    <span class="chip" onclick="loadExample('healthcare')">Healthcare clinics</span>
+    <span class="chip" onclick="loadExample('realestate')">Real estate</span>
+    <span class="chip" onclick="loadExample('roofing')">Roofing</span>
+    <span class="chip" onclick="loadExample('construction')">Construction</span>
+    <span class="chip" onclick="loadExample('restaurant')">Restaurants</span>
+    <span class="chip" onclick="loadExample('ecommerce')">E-commerce</span>
+    <span class="chip" onclick="loadExample('accounting')">Accounting</span>
+  </div>
+
+  <!-- Criteria sliders -->
+  <div class="section-label">Score each criterion &nbsp;(1 = lowest · 10 = highest)</div>
+  <div class="criteria-card" id="criteriaGrid"></div>
+
+  <!-- Pay warning -->
+  <div class="pay-warning" id="payWarning">
+    <strong>Ability to pay is critically low.</strong> High pain without financial capacity doesn't create a market — it creates a "support group." A business generating $200K/year at 10% margins cannot write a $10K–$20K check for AI. Target industries already spending $10K+/month on software and services.
+  </div>
+
+  <!-- Score result -->
+  <div class="result-panel">
+    <div class="result-top">
+      <span class="score-num" id="scoreBig">35</span>
+      <span class="score-denom">/ 70</span>
+      <span class="verdict-badge viable" id="verdictBadge">Viable — validate first</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:50%;background:#EF9F27"></div>
+    </div>
+    <p class="result-text" id="resultText">Adjust the sliders above to score your niche.</p>
+  </div>
+
+  <!-- Breakdown grid -->
+  <div class="section-label">Breakdown by criterion</div>
+  <div class="breakdown-grid" id="breakdownGrid"></div>
+
+  <!-- Desktop action row -->
+  <div class="action-row">
+    <button class="btn btn-primary" id="analyzeBtn" onclick="runAnalysis()">
+      <span id="btnText">Get AI analysis of this niche</span>
+      <svg id="btnArrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      <div class="spinner" id="spinner"></div>
+    </button>
+    <button class="btn btn-export" id="exportBtnDesktop" onclick="exportPDF()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export PDF
+    </button>
+  </div>
+
+  <!-- AI Analysis result -->
+  <div class="analysis-result" id="analysisResult">
+    <div class="analysis-header">
+      <h3>
+        AI Analysis
+        <span class="analysis-niche-tag" id="analysisNicheTag"></span>
+      </h3>
+    </div>
+    <div class="analysis-body" id="analysisBody"></div>
+    <div class="export-inline-btn" id="exportInline">
+      <button class="btn btn-export" onclick="exportPDF()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Analysis as PDF
+      </button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    Framework source: <em>Stop Running a Support Group: The 7-Point Framework for Building a High-Margin AI Agency</em> &amp; <em>Strategic Framework for AI Agency Niche Selection — Insights from Luke Pierce</em>.<br>
+    Scoring tiers: 55–70 powerhouse · 40–54 validate first · below 40 high risk. &nbsp;·&nbsp; v2.0
+  </footer>
+
+</main>
+
+<!-- Mobile sticky bar -->
+<div class="sticky-bar" id="stickyBar">
+  <button class="btn btn-primary" id="analyzeBtnMobile" onclick="runAnalysis()">
+    <span id="btnTextMobile">Analyze niche</span>
+    <svg id="btnArrowMobile" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <div class="spinner" id="spinnerMobile"></div>
+  </button>
+  <button class="btn btn-export" id="exportBtnMobile" onclick="exportPDF()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    PDF
+  </button>
+</div>
+
+<!-- jsPDF for client-side PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+  /* ── Data ── */
+  const CRITERIA = [
+    { id:'pain',   name:'Pain severity',      icon:'⚡', desc:'How bad and revenue-impacting is the problem? High scores = daily pain felt across multiple roles.', disq:false },
+    { id:'pay',    name:'Ability to pay',      icon:'💰', desc:'Critical disqualifier. Does the niche have margins to afford high-ticket AI? High pain + no capital = support group, not a market.', disq:true },
+    { id:'reach',  name:'Reachability',        icon:'🎯', desc:'Can you get in front of decision-makers? LinkedIn concentration, cold outreach, or industry communities.', disq:false },
+    { id:'repeat', name:'Process repetition',  icon:'🔁', desc:'Are workflows standardized and high-volume? Structured, repetitive processes are easiest to automate reliably.', disq:false },
+    { id:'comp',   name:'Competition density', icon:'👥', desc:'How crowded is the AI conversation in this niche? Underserved segments where AI hasn\'t become white noise score highest.', disq:false },
+    { id:'expand', name:'Expansion potential', icon:'📈', desc:'Is there deep back-end work after the first project? A one-and-done niche is a treadmill.', disq:false },
+    { id:'edge',   name:'Your edge',           icon:'⭐', desc:'Unfair advantage from past experience, existing relationships, or deep domain knowledge.', disq:false },
+  ];
+
+  const BD_COLORS = {
+    pain:'#D85A30', pay:'#3B6D11', reach:'#185FA5',
+    repeat:'#7F77DD', comp:'#0F6E56', expand:'#BA7517', edge:'#993556'
+  };
+
+  const EXAMPLES = {
+    healthcare:   { niche:'Healthcare clinics',     scores:{pain:9,pay:7,reach:6,repeat:8,comp:5,expand:8,edge:5} },
+    realestate:   { niche:'Real estate agents',     scores:{pain:8,pay:7,reach:8,repeat:7,comp:6,expand:7,edge:6} },
+    roofing:      { niche:'Roofing contractors',    scores:{pain:8,pay:6,reach:7,repeat:8,comp:7,expand:7,edge:5} },
+    construction: { niche:'Construction & trades',  scores:{pain:8,pay:6,reach:5,repeat:7,comp:7,expand:7,edge:5} },
+    restaurant:   { niche:'Restaurants',            scores:{pain:7,pay:4,reach:7,repeat:8,comp:5,expand:5,edge:4} },
+    ecommerce:    { niche:'E-commerce stores',      scores:{pain:8,pay:7,reach:8,repeat:9,comp:7,expand:7,edge:6} },
+    accounting:   { niche:'Accounting firms',       scores:{pain:8,pay:8,reach:6,repeat:9,comp:5,expand:8,edge:6} },
+  };
+
+  let scores = { pain:5, pay:5, reach:5, repeat:5, comp:5, expand:5, edge:5 };
+  let lastAnalysis = null;
+  let lastNiche = '';
+
+  function total() { return Object.values(scores).reduce((a,b)=>a+b,0); }
+
+  /* ── Build criteria grid ── */
+  function buildCriteria() {
+    const grid = document.getElementById('criteriaGrid');
+    grid.innerHTML = CRITERIA.map(c => `
+      <div class="criterion" id="crit-${c.id}">
+        <div class="crit-top">
+          <div class="crit-left">
+            <div class="crit-name">
+              <span class="icon" aria-hidden="true">${c.icon}</span>
+              ${c.name}
+              ${c.disq ? '<span class="disq-tag">Key disqualifier</span>' : ''}
+            </div>
+            <div class="crit-desc">${c.desc}</div>
+          </div>
+          <div class="crit-score" id="score-${c.id}">${scores[c.id]}</div>
+        </div>
+        <div class="slider-wrap">
+          <span>1</span>
+          <input type="range" min="1" max="10" step="1" value="${scores[c.id]}"
+            id="slider-${c.id}" oninput="onSlider('${c.id}', this.value)" />
+          <span>10</span>
+        </div>
+      </div>
+    `).join('');
+    buildBreakdown();
+    updateResult();
+  }
+
+  /* ── Build breakdown grid ── */
+  function buildBreakdown() {
+    const grid = document.getElementById('breakdownGrid');
+    grid.innerHTML = CRITERIA.map(c => `
+      <div class="bd-card">
+        <div class="bd-label">${c.name}</div>
+        <div class="bd-val" id="bd-${c.id}">${scores[c.id]}<span>/10</span></div>
+        <div class="bd-bar-track">
+          <div class="bd-bar-fill" id="bdbar-${c.id}"
+            style="width:${scores[c.id]*10}%;background:${BD_COLORS[c.id]}"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* ── Slider change ── */
+  function onSlider(id, val) {
+    scores[id] = parseInt(val);
+    document.getElementById('score-' + id).textContent = val;
+    const bd = document.getElementById('bd-' + id);
+    if (bd) bd.innerHTML = val + '<span>/10</span>';
+    const bar = document.getElementById('bdbar-' + id);
+    if (bar) bar.style.width = (val * 10) + '%';
+    updateResult();
+    clearAnalysis();
+  }
+
+  /* ── Live result update ── */
+  function updateResult() {
+    const t = total();
+    document.getElementById('scoreBig').textContent = t;
+    const pct = Math.round((t / 70) * 100);
+    const fill = document.getElementById('progressFill');
+    fill.style.width = pct + '%';
+
+    const badge = document.getElementById('verdictBadge');
+    const text  = document.getElementById('resultText');
+    document.getElementById('payWarning').style.display = scores.pay <= 3 ? 'block' : 'none';
+
+    if (t >= 55) {
+      fill.style.background = '#639922';
+      badge.className = 'verdict-badge powerhouse';
+      badge.textContent = 'Powerhouse niche';
+      text.textContent = 'Move forward. Build your positioning, lock in your tech stack, and start generating case studies. Specialists in this niche get chosen over generalists every time.';
+    } else if (t >= 40) {
+      fill.style.background = '#EF9F27';
+      badge.className = 'verdict-badge viable';
+      badge.textContent = 'Viable — validate first';
+      text.textContent = 'Viable but unproven. Run 5–10 outreach conversations to validate the pain. If those land well, expand to 50–100 before fully committing.';
+    } else {
+      fill.style.background = '#E24B4A';
+      badge.className = 'verdict-badge risky';
+      badge.textContent = 'High risk';
+      text.textContent = 'High-risk territory. The market may be unready, unreachable, or unable to pay. Review your lowest-scoring criteria to identify the specific blocker.';
+    }
+  }
+
+  function clearAnalysis() {
+    document.getElementById('analysisResult').style.display = 'none';
+    document.getElementById('exportBtnDesktop').style.display = 'none';
+    document.getElementById('exportBtnMobile').style.display = 'none';
+    document.getElementById('exportInline').style.display = 'none';
+    lastAnalysis = null;
+  }
+
+  function resetAll() {
+    scores = { pain:5, pay:5, reach:5, repeat:5, comp:5, expand:5, edge:5 };
+    document.getElementById('nicheInput').value = '';
+    buildCriteria();
+    clearAnalysis();
+  }
+
+  function loadExample(key) {
+    const ex = EXAMPLES[key];
+    scores = { ...ex.scores };
+    document.getElementById('nicheInput').value = ex.niche;
+    CRITERIA.forEach(c => {
+      const s = document.getElementById('slider-' + c.id);
+      if (s) s.value = scores[c.id];
+    });
+    buildCriteria();
+    clearAnalysis();
+  }
+
+  /* ── Set both analyze buttons state ── */
+  function setAnalyzeBusy(busy) {
+    ['analyzeBtn','analyzeBtnMobile'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) btn.disabled = busy;
+    });
+    ['btnText','btnTextMobile'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = busy ? 'Analyzing…' : (id === 'btnTextMobile' ? 'Analyze niche' : 'Get AI analysis of this niche');
+    });
+    ['btnArrow','btnArrowMobile'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = busy ? 'none' : 'block';
+    });
+    ['spinner','spinnerMobile'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = busy ? 'block' : 'none';
+    });
+  }
+
+  /* ── Run AI analysis ── */
+  async function runAnalysis() {
+    const niche = document.getElementById('nicheInput').value.trim() || 'this niche';
+    lastNiche = niche;
+    const result = document.getElementById('analysisResult');
+    const body   = document.getElementById('analysisBody');
+    const tag    = document.getElementById('analysisNicheTag');
+
+    setAnalyzeBusy(true);
+    result.style.display = 'none';
+
+    try {
+      const res = await fetch('/.netlify/functions/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ niche, scores }),
+      });
+      const data = await res.json();
+
+      tag.textContent = niche;
+      if (data.analysis) {
+        body.className = 'analysis-body';
+        body.textContent = data.analysis;
+        lastAnalysis = data.analysis;
+        document.getElementById('exportBtnDesktop').style.display = 'inline-flex';
+        document.getElementById('exportBtnMobile').style.display = 'inline-flex';
+        document.getElementById('exportInline').style.display = 'block';
+      } else {
+        body.className = 'analysis-body analysis-error';
+        body.textContent = data.error || 'Something went wrong. Check your ANTHROPIC_API_KEY in Netlify environment variables.';
+        lastAnalysis = null;
+      }
+    } catch (err) {
+      tag.textContent = niche;
+      body.className = 'analysis-body analysis-error';
+      body.textContent = 'Network error: ' + err.message;
+      lastAnalysis = null;
+    }
+
+    result.style.display = 'block';
+    setAnalyzeBusy(false);
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ── PDF Export ── */
+  function exportPDF() {
+    if (!lastAnalysis) { alert('Run the AI analysis first.'); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+
+    const pageW  = doc.internal.pageSize.getWidth();
+    const pageH  = doc.internal.pageSize.getHeight();
+    const margin = 50;
+    const usable = pageW - margin * 2;
+    const t      = total();
+    const niche  = lastNiche || 'Niche Evaluation';
+    const date   = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+    /* ── Verdict label ── */
+    let verdictLabel, verdictR, verdictG, verdictB;
+    if (t >= 55) {
+      verdictLabel = 'Powerhouse Niche';
+      [verdictR, verdictG, verdictB] = [59, 109, 17];
+    } else if (t >= 40) {
+      verdictLabel = 'Viable — Validate First';
+      [verdictR, verdictG, verdictB] = [133, 79, 11];
+    } else {
+      verdictLabel = 'High Risk';
+      [verdictR, verdictG, verdictB] = [163, 45, 45];
+    }
+
+    /* ── Header bar ── */
+    doc.setFillColor(26, 25, 23);
+    doc.rect(0, 0, pageW, 64, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(240, 239, 233);
+    doc.text('AI Agency Niche Evaluator', margin, 38);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(156, 154, 146);
+    doc.text('Boom Automations Framework  ·  Luke Pierce', margin, 52);
+
+    let y = 88;
+
+    /* ── Niche name ── */
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(26, 25, 23);
+    doc.text(niche, margin, y);
+    y += 10;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(156, 154, 146);
+    doc.text('Generated ' + date, margin, y + 10);
+    y += 26;
+
+    /* ── Score + verdict row ── */
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(48);
+    doc.setTextColor(26, 25, 23);
+    doc.text(String(t), margin, y + 40);
+
+    const scoreW = doc.getTextWidth(String(t));
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(18);
+    doc.setTextColor(156, 154, 146);
+    doc.text('/ 70', margin + scoreW + 6, y + 40);
+
+    /* Verdict badge */
+    doc.setFillColor(verdictR, verdictG, verdictB);
+    const badgeX = margin + scoreW + 60;
+    const badgeY = y + 20;
+    doc.roundedRect(badgeX, badgeY, doc.getTextWidth(verdictLabel) + 20, 20, 4, 4, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text(verdictLabel, badgeX + 10, badgeY + 13.5);
+    y += 58;
+
+    /* ── Progress bar ── */
+    doc.setFillColor(226, 224, 216);
+    doc.roundedRect(margin, y, usable, 6, 2, 2, 'F');
+    const barW = Math.round((t / 70) * usable);
+    doc.setFillColor(verdictR, verdictG, verdictB);
+    doc.roundedRect(margin, y, barW, 6, 2, 2, 'F');
+    y += 22;
+
+    /* ── Criterion breakdown table ── */
+    doc.setDrawColor(226, 224, 216);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageW - margin, y);
+    y += 14;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(156, 154, 146);
+    doc.text('CRITERION SCORES', margin, y);
+    y += 14;
+
+    const cols = 2;
+    const colW = usable / cols;
+    CRITERIA.forEach((c, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const cx  = margin + col * colW;
+      const cy  = y + row * 22;
+
+      if (col === 0 && row > 0 && cy + 22 > pageH - margin) {
+        doc.addPage();
+        y = margin;
+      }
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(107, 104, 96);
+      doc.text(c.name, cx, cy);
+
+      const scoreStr = String(scores[c.id]) + '/10';
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(26, 25, 23);
+      doc.text(scoreStr, cx + colW - 36, cy);
+
+      /* mini bar */
+      const bx = cx + doc.getTextWidth(c.name) + 8;
+      const bw = Math.max(0, (cx + colW - 48) - bx);
+      const bh = 3;
+      const by = cy - 8;
+      if (bw > 0) {
+        doc.setFillColor(226, 224, 216);
+        doc.roundedRect(bx, by, bw, bh, 1, 1, 'F');
+        const fillW = bw * (scores[c.id] / 10);
+        const [fr, fg, fb] = hexToRgb(BD_COLORS[c.id]);
+        doc.setFillColor(fr, fg, fb);
+        doc.roundedRect(bx, by, fillW, bh, 1, 1, 'F');
+      }
+    });
+
+    const tableRows = Math.ceil(CRITERIA.length / cols);
+    y += tableRows * 22 + 10;
+
+    doc.setDrawColor(226, 224, 216);
+    doc.line(margin, y, pageW - margin, y);
+    y += 18;
+
+    /* ── AI Analysis body ── */
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(156, 154, 146);
+    doc.text('AI ANALYSIS', margin, y);
+    y += 16;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(26, 25, 23);
+
+    const lines = doc.splitTextToSize(lastAnalysis, usable);
+    lines.forEach(line => {
+      if (y > pageH - margin - 14) {
+        doc.addPage();
+        y = margin;
+      }
+      /* Bold section headers (lines starting with all-caps word + colon) */
+      if (/^[A-Z][A-Z\s&\-]+:/.test(line.trim())) {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(26, 25, 23);
+      } else {
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(107, 104, 96);
+      }
+      doc.text(line, margin, y);
+      y += 15;
+    });
+
+    /* ── Footer on each page ── */
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      doc.setFillColor(245, 244, 240);
+      doc.rect(0, pageH - 32, pageW, 32, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(156, 154, 146);
+      doc.text('AI Agency Niche Evaluator · Boom Automations Framework · Luke Pierce', margin, pageH - 14);
+      doc.text('Page ' + p + ' of ' + totalPages, pageW - margin, pageH - 14, { align: 'right' });
+    }
+
+    const filename = (niche.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-niche-report.pdf');
+    doc.save(filename);
+  }
+
+  /* ── Utility: hex to rgb ── */
+  function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return [r, g, b];
+  }
+
+  /* ── Init ── */
+  buildCriteria();
+</script>
+</body>
+</html>

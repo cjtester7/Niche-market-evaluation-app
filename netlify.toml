@@ -1,3 +1,12 @@
+# FILE:        netlify.toml
+# VERSION:     2.0
+# DATE:        2026-06-06
+# CR:          CR002
+# CHANGES:     - Updated functions path reference (analyze-v2.js)
+#              - Version tracking header added
+# AUTHOR:      Thinkezly / CJ
+# PREV VERSION: netlify.toml v1.0 (CR001)
+
 [build]
   publish = "."
   functions = "netlify/functions"
