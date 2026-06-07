@@ -6,11 +6,11 @@ A standalone tool for scoring AI agency niches using the 7-point framework from 
 
 ## Changelog
 
-| CR    | Version | Date                | Files Changed                                        | Summary                                                                     |
-|-------|---------|---------------------|------------------------------------------------------|-----------------------------------------------------------------------------|
-| CR001 | v1.0    | 2026-06-06 @ 12:00  | index-v1.html, analyze.js, netlify.toml              | Initial build — 7-point scorer, AI analysis via Netlify Function            |
-| CR002 | v2.0    | 2026-06-06 @ 13:00  | index-v2.html, analyze.js, netlify.toml              | PDF export, mobile/tablet responsive layout, version headers added          |
-| CR003 | v3.0    | 2026-06-06 @ 14:00  | index-v2.html (header), analyze.js (header), netlify.toml, README | Naming convention docs, timestamps in headers, correct zip structure |
+| CR    | Version | Date                    | Files Changed                                        | Summary                                                                     |
+|-------|---------|-------------------------|------------------------------------------------------|-----------------------------------------------------------------------------|
+| CR001 | v1.0    | 2026-06-06 @ 20:00 EST  | index-v1.html, analyze.js, netlify.toml              | Initial build — 7-point scorer, AI analysis via Netlify Function            |
+| CR002 | v2.0    | 2026-06-06 @ 21:00 EST  | index-v2.html, analyze.js, netlify.toml              | PDF export, mobile/tablet responsive layout, version headers added          |
+| CR003 | v3.0    | 2026-06-06 @ 22:55 EST  | index-v2.html (header), analyze.js (header), netlify.toml, README | Naming convention docs, EST timestamps, correct zip structure, PDF dependency note |
 
 ---
 

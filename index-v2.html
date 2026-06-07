@@ -1,15 +1,20 @@
 <!--
   FILE:        index-v2.html
   VERSION:     2.0
-  DATE:        2026-06-06 @ 14:00
+  DATE:        2026-06-06 @ 22:55 EST
   CR:          CR002 / updated headers CR003
   CHANGES:     - Added PDF export of AI analysis report (jsPDF, client-side)
                - Full mobile & tablet responsive layout (breakpoints at 480px, 640px, 768px)
                - Version tracking headers added to all files
-               - Export button appears after AI analysis is returned
+               - Export button appears after AI analysis returns successfully
+                 NOTE: Export PDF button is hidden until the AI analysis call
+                 completes without error. If the Netlify function fails (e.g.
+                 missing API key or misnamed function file), lastAnalysis stays
+                 null and the button never shows. Verify analyze.js is deployed
+                 at netlify/functions/analyze.js and ANTHROPIC_API_KEY is set.
                - Sticky mobile action bar for Analyze + Export on small screens
                - Improved slider touch targets for mobile
-               CR003: timestamp added to DATE field, no logic changes
+               CR003: timestamps updated to EST, naming convention documented
   AUTHOR:      Thinkezly / CJ
   PREV VERSION: index-v1.html (CR001 — initial build)
 -->
