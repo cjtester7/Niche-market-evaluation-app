@@ -1,15 +1,38 @@
 # FILE:        netlify.toml
-# VERSION:     2.0
-# DATE:        2026-06-06
-# CR:          CR002
-# CHANGES:     - Updated functions path reference (analyze-v2.js)
-#              - Version tracking header added
+# VERSION:     3.0
+# DATE:        2026-06-06 @ 14:00
+# CR:          CR003
+# CHANGES:     - Added function naming convention documentation
+#              - Clarified that Netlify resolves functions by filename only;
+#                version tracking lives inside each function file's header
 # AUTHOR:      Thinkezly / CJ
-# PREV VERSION: netlify.toml v1.0 (CR001)
+# PREV VERSION: netlify.toml v2.0 (CR002)
+#
+# ── FUNCTION NAMING CONVENTION ─────────────────────────────────────────────
+# Netlify Functions are resolved by filename only. There is no native config
+# to alias or redirect individual function names in netlify.toml.
+#
+# Rule: The deployed filename must always match the frontend fetch path.
+#   Frontend calls:  /.netlify/functions/analyze
+#   Deployed file:   netlify/functions/analyze.js   ← must match, always
+#
+# Versioning for functions is tracked INSIDE the file header comment block
+# using the VERSIONED and DEPLOYED_AS fields, e.g.:
+#   VERSIONED:   analyze-v3.js
+#   DEPLOYED_AS: analyze.js
+#
+# HTML/CSS/JS assets (non-function files) DO use version suffixes in the
+# filename itself, e.g. index-v3.html, since they are not Netlify-resolved.
+# ───────────────────────────────────────────────────────────────────────────
 
 [build]
   publish = "."
   functions = "netlify/functions"
+
+[functions]
+  # All functions in netlify/functions/ are auto-detected by filename.
+  # Current active functions:
+  #   analyze.js  → /.netlify/functions/analyze  (versioned: analyze-v3.js)
 
 [[headers]]
   for = "/*"

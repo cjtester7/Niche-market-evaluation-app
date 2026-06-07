@@ -6,56 +6,86 @@ A standalone tool for scoring AI agency niches using the 7-point framework from 
 
 ## Changelog
 
-| CR     | Version | Date       | Files Changed                              | Summary                                                   |
-|--------|---------|------------|--------------------------------------------|-----------------------------------------------------------|
-| CR001  | v1.0    | 2026-06-06 | index-v1.html, analyze-v1.js, netlify.toml | Initial build — 7-point scorer, AI analysis via Netlify Function |
-| CR002  | v2.0    | 2026-06-06 | index-v2.html, analyze-v2.js, netlify.toml | PDF export, mobile/tablet responsive layout, version headers |
-
----
-
-## Stack
-
-- `index-v2.html` — single-file frontend, no build step
-- `netlify/functions/analyze-v2.js` — Netlify Function proxy to Anthropic API
-- `netlify.toml` — Netlify config
-
----
-
-## Deploy to Netlify
-
-### 1. Push to GitHub
-```bash
-git init
-git add .
-git commit -m "CR002 — v2.0 PDF export and mobile responsive"
-git remote add origin https://github.com/YOUR_USER/niche-scorer.git
-git push -u origin main
-```
-
-### 2. Connect in Netlify
-- New site → Import from GitHub → select repo
-- Build command: *(leave blank)*
-- Publish directory: `.`
-
-### 3. Add environment variable
-In Netlify → Site settings → Environment variables:
-```
-ANTHROPIC_API_KEY = sk-ant-...
-```
-
-### 4. Deploy
-Trigger a deploy. The AI analysis button calls `/.netlify/functions/analyze-v2`.
+| CR    | Version | Date                | Files Changed                                        | Summary                                                                     |
+|-------|---------|---------------------|------------------------------------------------------|-----------------------------------------------------------------------------|
+| CR001 | v1.0    | 2026-06-06 @ 12:00  | index-v1.html, analyze.js, netlify.toml              | Initial build — 7-point scorer, AI analysis via Netlify Function            |
+| CR002 | v2.0    | 2026-06-06 @ 13:00  | index-v2.html, analyze.js, netlify.toml              | PDF export, mobile/tablet responsive layout, version headers added          |
+| CR003 | v3.0    | 2026-06-06 @ 14:00  | index-v2.html (header), analyze.js (header), netlify.toml, README | Naming convention docs, timestamps in headers, correct zip structure |
 
 ---
 
 ## File Naming Convention
 
+### HTML / CSS / JS assets
+Version suffix goes in the **filename**:
 ```
-index-v1.html          ← CR001 initial
-index-v2.html          ← CR002 PDF + mobile
-analyze-v1.js          ← CR001 initial
-analyze-v2.js          ← CR002 version header update
+index-v1.html       ← CR001 initial build
+index-v2.html       ← CR002 PDF export + mobile responsive
 ```
+
+### Netlify Functions
+Netlify resolves functions by **filename only** — there is no native config to alias or redirect individual function names. The deployed filename must always match the frontend fetch path.
+
+```
+Frontend calls:   /.netlify/functions/analyze
+Deployed file:    netlify/functions/analyze.js   ← must always be this name
+```
+
+Version tracking for functions lives **inside the file header**, not in the filename:
+```js
+/*
+  FILE:        analyze.js
+  VERSIONED:   analyze-v3.js     ← logical version alias
+  DEPLOYED_AS: analyze.js        ← what Netlify sees
+  VERSION:     3.0
+  ...
+*/
+```
+
+This convention is also documented in `netlify.toml` under the `[functions]` section.
+
+---
+
+## Project Structure
+```
+niche-scorer/
+├── index-v2.html                   ← frontend (current: v2)
+├── netlify.toml                    ← build + function config
+├── README.md
+└── netlify/
+    └── functions/
+        └── analyze.js              ← Anthropic API proxy (versioned: v3)
+```
+
+---
+
+## Deploy to Netlify
+
+### 1. Extract zip (structure is pre-set)
+The zip extracts to the correct folder structure — no manual moving needed.
+
+### 2. Push to GitHub
+```bash
+git init
+git add .
+git commit -m "CR003 — naming convention, timestamps, zip structure"
+git remote add origin https://github.com/YOUR_USER/niche-scorer.git
+git push -u origin main
+```
+
+### 3. Connect in Netlify
+- New site → Import from GitHub → select repo
+- Build command: *(leave blank)*
+- Publish directory: `.`
+
+### 4. Add environment variable
+In Netlify → Site settings → Environment variables:
+```
+ANTHROPIC_API_KEY = sk-ant-...
+```
+
+### 5. Deploy
+Trigger a redeploy. The AI analysis button calls `/.netlify/functions/analyze`.
 
 ---
 

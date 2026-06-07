@@ -1,3 +1,22 @@
+/*
+  FILE:        analyze.js
+  VERSIONED:   analyze-v3.js
+  DEPLOYED_AS: analyze.js
+               NOTE: Netlify resolves functions by filename only. The deployed
+               filename must always be "analyze.js" to match the frontend fetch
+               path /.netlify/functions/analyze. Version is tracked here in the
+               header and in the project changelog. netlify.toml documents this
+               convention under [functions] comments.
+  VERSION:     3.0
+  DATE:        2026-06-06 @ 14:00
+  CR:          CR003
+  CHANGES:     - Added DEPLOYED_AS note and timestamp to header
+               - Added VERSIONED alias to header
+               - No logic changes (CR003 is standards/structure only)
+  AUTHOR:      Thinkezly / CJ
+  PREV VERSION: analyze.js v2.0 (CR002)
+*/
+
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -7,7 +26,7 @@ exports.handler = async function (event) {
   if (!ANTHROPIC_API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "ANTHROPIC_API_KEY not configured." }),
+      body: JSON.stringify({ error: "ANTHROPIC_API_KEY not configured in Netlify environment variables." }),
     };
   }
 
@@ -26,13 +45,13 @@ exports.handler = async function (event) {
   const total = Object.values(scores).reduce((a, b) => a + b, 0);
 
   const criteriaNames = {
-    pain: "Pain Severity",
-    pay: "Ability to Pay",
-    reach: "Reachability",
+    pain:   "Pain Severity",
+    pay:    "Ability to Pay",
+    reach:  "Reachability",
     repeat: "Process Repetition",
-    comp: "Competition Density",
+    comp:   "Competition Density",
     expand: "Expansion Potential",
-    edge: "Your Edge",
+    edge:   "Your Edge",
   };
 
   const breakdown = Object.entries(scores)
@@ -52,9 +71,9 @@ The framework scores niches across:
 
 Scoring tiers: 55-70 = powerhouse, 40-54 = viable (validate first), below 40 = high risk.
 
-Key principle from Luke Pierce: "Generalists fight for scraps. Specialists get chosen." The #1 AI opportunity in any niche must (a) cost them real money, (b) be measurable before/after, and (c) be a problem they already know they have.
+Key principle: "Generalists fight for scraps. Specialists get chosen." The #1 AI opportunity in any niche must (a) cost them real money, (b) be measurable before/after, and (c) be a problem they already know they have.
 
-Respond in clear, direct sections. Be specific and actionable. No fluff.`;
+Respond with clear labeled sections using ALL-CAPS headers followed by a colon (e.g. "VERDICT:"). Be specific and actionable. No fluff.`;
 
   const userMessage = `Analyze this niche for an AI automation agency:
 
@@ -62,14 +81,19 @@ Niche: "${niche}"
 Scores: ${breakdown}
 Total: ${total}/70
 
-Please provide:
+Provide the following sections:
 
-1. VERDICT — one sentence on whether this niche is worth pursuing at this score
-2. TOP STRENGTHS — the 2-3 highest-scoring criteria and what they mean in practice for this niche
-3. BIGGEST RISKS — the 2-3 weakest criteria and what could kill the deal
-4. LEAD USE CASE — the single best AI automation to lead with for this niche (must meet the 3 conditions: costs real money, measurable, already-known problem)
-5. RESEARCH & OUTREACH STRATEGY — where to find decision-makers, what pain to open with, and what the "prescription" opener looks like for a sales call
-6. MARKET SIZE CHECK — rough estimate of how many businesses fit this niche in the US and whether that's a sustainable market at a 20-conversation-per-close ratio`;
+VERDICT: One sentence on whether this niche is worth pursuing at this score.
+
+TOP STRENGTHS: The 2-3 highest-scoring criteria and what they mean in practice for this niche.
+
+BIGGEST RISKS: The 2-3 weakest criteria and what could kill the deal.
+
+LEAD USE CASE: The single best AI automation to lead with for this niche. Must meet the 3 conditions: costs real money, measurable before/after, problem they already know about.
+
+RESEARCH & OUTREACH STRATEGY: Where to find decision-makers, what pain to open with, and what the "prescription" opener looks like on a sales call.
+
+MARKET SIZE CHECK: Rough estimate of how many businesses fit this niche in the US and whether that's sustainable at a 20-conversation-per-close ratio.`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
